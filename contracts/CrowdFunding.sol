@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract CrowdFunding {
+contract CrowdFunding is Ownable, ReentrancyGuard {
     struct Campaign {
         string title;
         string description;
@@ -24,7 +24,7 @@ contract CrowdFunding {
     event DonateToCampaign(uint indexed campaignId, address indexed donator, uint amount);
     event CampaignEnded(uint indexed campaignId, uint amountRaised, address indexed benefactor);
 
-    // constructor() Ownable() {}
+    constructor(address initialOwner) Ownable(initialOwner) {}
 
     function createCampaign(string memory _title, string memory _description, address payable _benefactor, uint _goal, uint _deadline) external {
         require(_goal > 0, "Goal must be greater than zero");
@@ -67,6 +67,15 @@ contract CrowdFunding {
         campaign.benefactor.transfer(campaign.amountRaised);
 
         emit CampaignEnded(_campaignId, campaign.amountRaised, campaign.benefactor);
+    }
+
+    function withdrawLeftFunds() external onlyOwner nonReentrant {
+        uint256 bal = address(this).balance;
+        require(bal > 0, "No funds remaining");
+
+        (bool sent, ) = msg.sender.call{value: bal}("");
+
+        require(sent, "Failed to send funds");
     }
 
     // Fallback function to prevent accidental ETH transfer
