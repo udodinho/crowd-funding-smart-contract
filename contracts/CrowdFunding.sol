@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: SEE LICENSE IN LICENSE
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -24,10 +24,10 @@ contract CrowdFunding is Ownable, ReentrancyGuard {
     event DonateToCampaign(uint indexed campaignId, address indexed donator, uint amount);
     event CampaignEnded(uint indexed campaignId, uint amountRaised, address indexed benefactor);
 
-    constructor(address initialOwner) Ownable(initialOwner) {}
+    constructor(address initialOwner) Ownable(msg.sender) {}
 
     function createCampaign(string memory _title, string memory _description, address payable _benefactor, uint _goal, uint _deadline) external {
-        require(_goal > 0, "Goal must be greater than zero");
+        require(_goal > 0, "Goal must be greater than 0");
         require(_benefactor != address(0), "Invalid benefactor address");
 
         campaignId++;
